@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 // TODO (1) Implement OnPreferenceChangeListener
 public class SettingsFragment extends PreferenceFragmentCompat implements
-        OnSharedPreferenceChangeListener {
+        OnSharedPreferenceChangeListener, Preference.OnPreferenceChangeListener {
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
@@ -49,6 +49,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             if (!(p instanceof CheckBoxPreference)) {
                 String value = sharedPreferences.getString(p.getKey(), "");
                 setPreferenceSummary(p, value);
+            }
+            if(p instanceof EditTextPreference) {
+                p.setOnPreferenceChangeListener(this);
             }
         }
         // TODO (3) Add the OnPreferenceChangeListener specifically to the EditTextPreference
@@ -92,6 +95,32 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     // to a float; if it cannot, show a helpful error message and return false. If it can be converted
     // to a float check that that float is between 0 (exclusive) and 3 (inclusive). If it isn't, show
     // an error message and return false. If it is a valid number, return true.
+
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        boolean validated = false;
+        try {
+            if (newValue != null && newValue instanceof String) {
+                String newString = (String) newValue;
+                /*newString = newString.trim();
+                if (newString.isEmpty()) {
+                    newString = "1";
+                }*/
+                Float newFloat = Float.parseFloat(newString);
+                if (newFloat > 0 && newFloat <= 3) {
+                    validated = true;
+                }
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            validated = false;
+        }
+        if(!validated) {
+            Toast.makeText(getContext(), "Please, enter a number between 0 and 3.", Toast.LENGTH_LONG).show();
+        }
+        return validated;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
